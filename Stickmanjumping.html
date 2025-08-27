@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stickman Jump Game</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(to top, #7ec850 20%, #87ceeb 80%);
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    #game {
+      position: relative;
+      width: 800px;
+      height: 300px;
+      background: #aee3f5;
+      overflow: hidden;
+      border: 3px solid #222;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    }
+
+    #ground {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 50px;
+      background: #4CAF50;
+    }
+
+    #stickman {
+      position: absolute;
+      bottom: 50px;
+      left: 100px;
+      width: 20px;
+      height: 60px;
+      background-color: black;
+    }
+
+    
+    #stickman::before {
+      content: "";
+      position: absolute;
+      top: -14px;
+      left: 4px;
+      width: 12px;
+      height: 12px;
+      background: white;
+      border: 2px solid black;
+      border-radius: 50%;
+    }
+
+    #obstacle {
+      position: absolute;
+      bottom: 50px;
+      left: 800px;
+      width: 20px;
+      height: 40px;
+      background-color: crimson;
+      animation: moveObstacle 2s linear infinite;
+    }
+
+    @keyframes moveObstacle {
+      0% {
+        left: 800px;
+      }
+      100% {
+        left: -20px;
+      }
+    }
+
+    .jump {
+      animation: jump 0.6s ease-out;
+    }
+
+    @keyframes jump {
+      0% { bottom: 50px; }
+      50% { bottom: 150px; }
+      100% { bottom: 50px; }
+    }
+
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 20px;
+      color: #000;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+
+    #game-over {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 20px 30px;
+      border-radius: 10px;
+      font-size: 28px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <div id="score">Score: 0</div>
+    <div id="stickman"></div>
+    <div id="obstacle"></div>
+    <div id="ground"></div>
+    <div id="game-over">💥 Game Over!<br>Refresh to Restart</div>
+  </div>
+
+  <script>
+    const stickman = document.getElementById("stickman");
+    const obstacle = document.getElementById("obstacle");
+    const scoreDisplay = document.getElementById("score");
+    const gameOverText = document.getElementById("game-over");
+
+    let isJumping = false;
+    let score = 0;
+    let gameRunning = true;
+
+   
+    document.addEventListener("keydown", function (e) {
+      if ((e.code === "Space" || e.key === " ") && !isJumping && gameRunning) {
+        jump();
+      }
+    });
+
+    function jump() {
+      isJumping = true;
+      stickman.classList.add("jump");
+
+      setTimeout(() => {
+        stickman.classList.remove("jump");
+        isJumping = false;
+      }, 600);
+    }
+
+ 
+    const scoreInterval = setInterval(() => {
+      if (gameRunning) {
+        score++;
+        scoreDisplay.textContent = "Score: " + score;
+      }
+    }, 1000); 
+    
+    const collisionInterval = setInterval(() => {
+      const stickmanRect = stickman.getBoundingClientRect();
+      const obstacleRect = obstacle.getBoundingClientRect();
+
+      if (
+        obstacleRect.left < stickmanRect.right &&
+        obstacleRect.right > stickmanRect.left &&
+        obstacleRect.bottom > stickmanRect.top + 10 &&
+        obstacleRect.top < stickmanRect.bottom
+      ) {
+       
+        gameRunning = false;
+        clearInterval(scoreInterval);
+        clearInterval(collisionInterval);
+        obstacle.style.animation = "none";
+        obstacle.style.left = obstacleRect.left + "px";
+        gameOverText.style.display = "block";
+      }
+    }, 10);
+  </script>
+</body>
+</html>
